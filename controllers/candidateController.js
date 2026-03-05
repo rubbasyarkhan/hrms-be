@@ -1,4 +1,6 @@
 import Candidate from "../models/Candidate.js";
+import Employee from "../models/Employee.js";
+import Job from "../models/Job.js";
 
 export const createCandidate = async (req, res) => {
   try {
@@ -74,13 +76,50 @@ export const getCandidateById = async (req, res) => {
 
 export const updateCandidate = async (req, res) => {
   try {
-    const updatedCandidate = await Candidate.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true },
-    );
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // Check if moving to employee
+    if (status === "Employee") {
+      const candidate = await Candidate.findById(id).populate("job");
+      if (!candidate) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Candidate not found" });
+      }
+
+      // Create new Employee record
+      const newEmployee = new Employee({
+        name: candidate.fullName,
+        email: candidate.email,
+        homePhone: candidate.phoneNumber,
+        joiningDate: candidate.joiningDate || new Date(),
+        organization: candidate.organization,
+        department: candidate.job?.department,
+        emergencyContacts: [],
+        profilePicture: candidate.profilePicture,
+        resume: candidate.resume,
+      });
+
+      await newEmployee.save();
+
+      // Delete candidate after successful move
+      await Candidate.findByIdAndDelete(id);
+
+      return res.json({
+        success: true,
+        message: "Candidate promoted to Employee successfully",
+        isPromoted: true,
+      });
+    }
+
+    // Normal update for other status changes
+    const updatedCandidate = await Candidate.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
     res.json(updatedCandidate);
   } catch (err) {
+    console.error("Error updating candidate:", err);
     res.status(500).json({ message: "Server error" });
   }
 };

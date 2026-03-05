@@ -17,9 +17,9 @@ export const createOrganization = async (req, res) => {
 export const getOrganizations = async (req, res) => {
   try {
     const orgs = await Organization.find();
-    res.json(orgs);
+    res.json({ success: true, data: orgs });
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -27,10 +27,12 @@ export const getOrganizationById = async (req, res) => {
   try {
     const org = await Organization.findById(req.params.id);
     if (!org)
-      return res.status(404).json({ message: "Organization not found" });
-    res.json(org);
+      return res
+        .status(404)
+        .json({ success: false, message: "Organization not found" });
+    res.json({ success: true, data: org });
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
