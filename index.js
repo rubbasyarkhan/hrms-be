@@ -1,8 +1,8 @@
 import express from "express";
-import mongoose from "mongoose";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
+import dbConnect from "./lib/dbConnect.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import organizationRoutes from "./routes/organizationRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
@@ -34,11 +34,18 @@ app.use(
   }),
 );
 
-// MongoDB Connection
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.log("MongoDB connection error:", err));
+// DB Connection Middleware — ensures MongoDB is connected before any route runs
+app.use(async (req, res, next) => {
+  try {
+    await dbConnect();
+    next();
+  } catch (err) {
+    console.error("MongoDB connection failed:", err);
+    res
+      .status(503)
+      .json({ message: "Database unavailable. Please try again." });
+  }
+});
 
 // Routes
 app.use("/api/admin", adminRoutes);
