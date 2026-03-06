@@ -27,6 +27,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "https://hrmsenterandpost.netlify.app",
+      "https://hrmsenterandpost2.netlify.app",
       "https://enterandpost.netlify.app",
     ],
     credentials: true,
