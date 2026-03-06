@@ -26,7 +26,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://enterandpoststaging.netlify.app",
+      "https://hrmsenterandpost.netlify.app",
       "https://enterandpost.netlify.app",
     ],
     credentials: true,
